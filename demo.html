@@ -1,0 +1,1631 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Program Integrity Tracking</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <link rel="stylesheet" href="styles.css">
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body>
+  <div class="app-wrapper">
+    
+  <!-- Login Screen Section separated to single validation -->
+   <div id="loginScreen" class="login-screen">
+    <div class="login-card">
+     <div class="login-header">
+      <h1>Program Integrity Tracking</h1>
+      <p>Program Integrity Tracking System</p>
+     </div>
+     <form id="loginForm" action="login.php" method="post">
+      <div class="form-group"><label for="username">Username</label> 
+        <input type="text" id="username" name="username" placeholder="Enter your username" maxlength="10" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="password">Password</label>
+         <input type="password" id="password" name="password" placeholder="Enter your password" maxlength="10" required>
+      </div>
+            <button type="submit" class="login-button" value="Login">Sign In</button>
+      <button type="reset" class="login-button" value="Clear">Clear</button>
+      
+      <p style="text-align: center; margin-top: 15px; font-size: 12px; color: #4a5568;">Demo: Use any username/password to proceed</p>
+     </form>
+    </div>
+
+
+
+   </div>
+   
+   <!-- Main Application -->
+   <div id="mainApp" class="main-app"><!-- Header -->
+    <div class="app-header">
+     <h1>Fraud Case Tracking System</h1>
+     <div class="header-search" id="headerSearch"><input type="text" id="globalSearchInput" placeholder="Search cases and records..."> <button onclick="performGlobalSearch()"><i data-lucide="search" style="width: 16px; height: 16px;"></i> Search</button>
+     </div>
+     <div class="user-info"><span id="userDisplay">User</span> <button id="logoutBtn" class="logout-button">Logout</button>
+     </div>
+    </div><!-- Tabs -->
+    <div class="tabs-container"><button class="tab-button active" data-tab="dashboard">Dashboard</button> <button class="tab-button" data-tab="fraud-cases">Fraud Cases</button> <button class="tab-button" data-tab="ccl-records">CCL Records</button> <button class="tab-button" data-tab="reference-data">Reference Data</button>
+    </div><!-- Content Area -->
+    <div class="content-area"><!-- Dashboard Tab -->
+     <div id="dashboardTab" class="tab-content active">
+      <div class="dashboard-grid">
+       <div class="stat-card status-open">
+        <h3>Open Cases</h3>
+        <div class="stat-number" id="openCasesCount">
+         0
+        </div>
+       </div>
+       <div class="stat-card status-investigation">
+        <h3>Under Investigation</h3>
+        <div class="stat-number" id="investigationCasesCount">
+         0
+        </div>
+       </div>
+       <div class="stat-card status-closed">
+        <h3>Closed Cases</h3>
+        <div class="stat-number" id="closedCasesCount">
+         0
+        </div>
+       </div>
+       <div class="stat-card status-total">
+        <h3>Total Cases</h3>
+        <div class="stat-number" id="totalCasesCount">
+         0
+        </div>
+       </div>
+      </div>
+      <div class="report-section">
+       <h3>Generate Reports</h3>
+       <div class="report-buttons"><button class="report-btn" onclick="downloadCSVReport()"> <i data-lucide="download" style="width: 18px; height: 18px;"></i> Download CSV </button> <button class="report-btn" onclick="downloadExcelReport()"> <i data-lucide="file-spreadsheet" style="width: 18px; height: 18px;"></i> Download Excel </button> <button class="report-btn" onclick="generatePDFReport()"> <i data-lucide="file-pdf" style="width: 18px; height: 18px;"></i> Generate PDF </button> <button class="report-btn" onclick="printReport()"> <i data-lucide="printer" style="width: 18px; height: 18px;"></i> Print Report </button>
+       </div>
+      </div>
+     </div><!-- Fraud Cases Tab -->
+     <div id="fraudCasesTab" class="tab-content">
+      <div class="search-section">
+       <h3 style="color: #001f3f; margin-bottom: 15px; font-weight: 700;">Search Cases</h3>
+       <div class="search-container"><input type="text" id="caseSearchInput" class="search-input" placeholder="Search by case #, name, or status..."> <button class="search-button" onclick="searchFraudCases()"> <i data-lucide="search" style="width: 18px; height: 18px;"></i> Search </button> <button class="clear-search-btn" onclick="clearFraudSearch()">Clear</button>
+       </div>
+       <div class="search-results-info" id="fraudSearchInfo"></div>
+      </div>
+      <div class="table-wrapper">
+       <div class="table-header">
+        <h2>Fraud Cases</h2><button class="add-button" onclick="openFraudCaseModal()"> <i data-lucide="plus" style="width: 18px; height: 18px;"></i> New Case </button>
+       </div>
+       <div class="table-content">
+        <table id="fraudCasesTable">
+         <thead>
+          <tr>
+           <th>Case #</th>
+           <th>Case Name</th>
+           <th>Date</th>
+           <th>Type</th>
+           <th>Source</th>
+           <th>Status</th>
+           <th>Potential O/P</th>
+           <th>Actions</th>
+          </tr>
+         </thead>
+         <tbody id="fraudCasesBody">
+          <tr>
+           <td colspan="8" style="text-align: center; padding: 40px; color: #4a5568;">No cases recorded yet. Click "New Case" to add one.</td>
+          </tr>
+         </tbody>
+        </table>
+       </div>
+      </div>
+     </div><!-- CCL Records Tab -->
+     <div id="cclRecordsTab" class="tab-content">
+      <div class="search-section">
+       <h3 style="color: #001f3f; margin-bottom: 15px; font-weight: 700;">Search CCL Records</h3>
+       <div class="search-container"><input type="text" id="cclSearchInput" class="search-input" placeholder="Search by provider name, ID, or LPA..."> <button class="search-button" onclick="searchCCLRecords()"> <i data-lucide="search" style="width: 18px; height: 18px;"></i> Search </button> <button class="clear-search-btn" onclick="clearCCLSearch()">Clear</button>
+       </div>
+       <div class="search-results-info" id="cclSearchInfo"></div>
+      </div>
+      <div class="table-wrapper">
+       <div class="table-header">
+        <h2>CCL Records</h2><button class="add-button" onclick="openCCLModal()"> <i data-lucide="plus" style="width: 18px; height: 18px;"></i> New Record </button>
+       </div>
+       <div class="table-content">
+        <table id="cclTable">
+         <thead>
+          <tr>
+           <th>Provider ID</th>
+           <th>Provider Name</th>
+           <th>Date</th>
+           <th>LPA</th>
+           <th>Provider Status</th>
+           <th>Visit Date</th>
+           <th>Actions</th>
+          </tr>
+         </thead>
+         <tbody id="cclTableBody">
+          <tr>
+           <td colspan="7" style="text-align: center; padding: 40px; color: #4a5568;">No CCL records yet. Click "New Record" to add one.</td>
+          </tr>
+         </tbody>
+        </table>
+       </div>
+      </div>
+     </div><!-- Reference Data Tab -->
+     <div id="referenceDataTab" class="tab-content">
+      <h2 style="color: #001f3f; margin-bottom: 20px; font-weight: 700;">Reference Tables</h2>
+      <div class="reference-tables"><!-- Allegation Source -->
+       <div class="reference-card">
+        <h3>Allegation Source</h3>
+        <div class="reference-items">
+         <div class="reference-item"><span>Tip Line</span> <span class="status-badge active">Active</span>
+         </div>
+         <div class="reference-item"><span>Internal Review</span> <span class="status-badge active">Active</span>
+         </div>
+         <div class="reference-item"><span>Whistleblower</span> <span class="status-badge active">Active</span>
+         </div>
+         <div class="reference-item"><span>Audit</span> <span class="status-badge active">Active</span>
+         </div>
+        </div>
+       </div><!-- Case Type -->
+       <div class="reference-card">
+        <h3>Case Type</h3>
+        <div class="reference-items">
+         <div class="reference-item"><span>Embezzlement</span> <span class="status-badge active">Active</span>
+         </div>
+         <div class="reference-item"><span>Financial Irregularity</span> <span class="status-badge active">Active</span>
+         </div>
+         <div class="reference-item"><span>Conflict of Interest</span> <span class="status-badge active">Active</span>
+         </div>
+         <div class="reference-item"><span>Regulatory Violation</span> <span class="status-badge active">Active</span>
+         </div>
+        </div>
+       </div><!-- Relationship -->
+       <div class="reference-card">
+        <h3>Relationship</h3>
+        <div class="reference-items">
+         <div class="reference-item"><span>Direct</span> <span class="status-badge active">Active</span>
+         </div>
+         <div class="reference-item"><span>Indirect</span> <span class="status-badge active">Active</span>
+         </div>
+         <div class="reference-item"><span>Family</span> <span class="status-badge active">Active</span>
+         </div>
+         <div class="reference-item"><span>Business Partner</span> <span class="status-badge active">Active</span>
+         </div>
+        </div>
+       </div><!-- Status -->
+       <div class="reference-card">
+        <h3>Status</h3>
+        <div class="reference-items">
+         <div class="reference-item"><span>Open</span> <span class="status-badge active">Active</span>
+         </div>
+         <div class="reference-item"><span>Under Investigation</span> <span class="status-badge active">Active</span>
+         </div>
+         <div class="reference-item"><span>On Hold</span> <span class="status-badge active">Active</span>
+         </div>
+         <div class="reference-item"><span>Closed</span> <span class="status-badge active">Active</span>
+         </div>
+        </div>
+       </div><!-- Outcome -->
+       <div class="reference-card">
+        <h3>Outcome</h3>
+        <div class="reference-items">
+         <div class="reference-item"><span>Substantiated</span> <span class="status-badge active">Active</span>
+         </div>
+         <div class="reference-item"><span>Not Substantiated</span> <span class="status-badge active">Active</span>
+         </div>
+         <div class="reference-item"><span>Inconclusive</span> <span class="status-badge active">Active</span>
+         </div>
+         <div class="reference-item"><span>Referred</span> <span class="status-badge active">Active</span>
+         </div>
+        </div>
+       </div><!-- Provider Status -->
+       <div class="reference-card">
+        <h3>Provider Status</h3>
+        <div class="reference-items">
+         <div class="reference-item"><span>Active</span> <span class="status-badge active">Active</span>
+         </div>
+         <div class="reference-item"><span>Probation</span> <span class="status-badge active">Active</span>
+         </div>
+         <div class="reference-item"><span>Suspended</span> <span class="status-badge inactive">Inactive</span>
+         </div>
+         <div class="reference-item"><span>Terminated</span> <span class="status-badge inactive">Inactive</span>
+         </div>
+        </div>
+       </div><!-- LPA -->
+       <div class="reference-card">
+        <h3>LPA</h3>
+        <div class="reference-items">
+         <div class="reference-item"><span>Region A</span> <span class="status-badge active">Active</span>
+         </div>
+         <div class="reference-item"><span>Region B</span> <span class="status-badge active">Active</span>
+         </div>
+         <div class="reference-item"><span>Region C</span> <span class="status-badge active">Active</span>
+         </div>
+         <div class="reference-item"><span>Region D</span> <span class="status-badge active">Active</span>
+         </div>
+        </div>
+       </div><!-- Requested Docs -->
+       <div class="reference-card">
+        <h3>Requested Docs/Info</h3>
+        <div class="reference-items">
+         <div class="reference-item"><span>Financial Records</span> <span class="status-badge active">Active</span>
+         </div>
+         <div class="reference-item"><span>Personnel Files</span> <span class="status-badge active">Active</span>
+         </div>
+         <div class="reference-item"><span>Licenses/Certifications</span> <span class="status-badge active">Active</span>
+         </div>
+         <div class="reference-item"><span>Correspondence</span> <span class="status-badge active">Active</span>
+         </div>
+        </div>
+       </div>
+      </div>
+     </div>
+    </div>
+   </div>
+  </div><!-- Fraud Case Modal -->
+  <div id="fraudCaseModal" class="modal">
+   <div class="modal-content">
+    <div class="modal-header">
+     <h3>Add New Fraud Case</h3><button class="close-modal" onclick="closeFraudCaseModal()">×</button>
+    </div>
+    <form id="fraudCaseForm">
+     <div class="form-grid">
+      <div class="form-group-modal"><label for="fraudDate">Date</label> <input type="date" id="fraudDate" required>
+      </div>
+      <div class="form-group-modal"><label for="fraudCaseNum">Case #</label> <input type="number" id="fraudCaseNum" required>
+      </div>
+     </div>
+     <div class="form-grid">
+      <div class="form-group-modal"><label for="fraudCaseName">Case Name</label> <input type="text" id="fraudCaseName" required>
+      </div>
+      <div class="form-group-modal"><label for="fraudCaseType">Case Type</label> <select id="fraudCaseType" required> <option value="">Select Type</option> <option>Embezzlement</option> <option>Financial Irregularity</option> <option>Conflict of Interest</option> <option>Regulatory Violation</option> </select>
+      </div>
+     </div>
+     <div class="form-grid">
+      <div class="form-group-modal"><label for="fraudAllegationSource">Allegation Source</label> <select id="fraudAllegationSource" required> <option value="">Select Source</option> <option>Tip Line</option> <option>Internal Review</option> <option>Whistleblower</option> <option>Audit</option> </select>
+      </div>
+      <div class="form-group-modal"><label for="fraudStatus">Status</label> <select id="fraudStatus" required> <option value="">Select Status</option> <option>Open</option> <option>Under Investigation</option> <option>On Hold</option> <option>Closed</option> </select>
+      </div>
+     </div>
+     <div class="form-grid full">
+      <div class="form-group-modal"><label for="fraudAllegation">Allegation</label> <textarea id="fraudAllegation"></textarea>
+      </div>
+     </div>
+     <div class="form-grid">
+      <div class="form-group-modal"><label for="fraudPotentialOP">Potential O/P ($)</label> <input type="number" id="fraudPotentialOP" step="0.01">
+      </div>
+      <div class="form-group-modal"><label for="fraudConnectionNum">Connection #</label> <input type="text" id="fraudConnectionNum">
+      </div>
+     </div>
+     <div class="form-grid">
+      <div class="form-group-modal"><label for="fraudRelationship">Relationship</label> <select id="fraudRelationship"> <option value="">Select Relationship</option> <option>Direct</option> <option>Indirect</option> <option>Family</option> <option>Business Partner</option> </select>
+      </div>
+      <div class="form-group-modal"><label for="fraudOutcome">Outcome</label> <select id="fraudOutcome"> <option value="">Select Outcome</option> <option>Substantiated</option> <option>Not Substantiated</option> <option>Inconclusive</option> <option>Referred</option> </select>
+      </div>
+     </div>
+     <div class="form-grid full">
+      <div class="form-group-modal"><label for="fraudConnections">Connections</label> <textarea id="fraudConnections"></textarea>
+      </div>
+     </div>
+     <div class="form-grid full">
+      <div class="form-group-modal"><label for="fraudAllegationContact">Allegation Contact</label> <textarea id="fraudAllegationContact"></textarea>
+      </div>
+     </div>
+     <div class="form-grid full">
+      <div class="form-group-modal"><label for="fraudNotes">Notes</label> <textarea id="fraudNotes"></textarea>
+      </div>
+     </div>
+     <div class="form-grid full">
+      <div class="form-group-modal"><label for="fraudPublicNotes">Public Notes</label> <textarea id="fraudPublicNotes"></textarea>
+      </div>
+     </div>
+     <div class="form-grid full">
+      <div class="form-group-modal"><label for="fraudBPAIRequest">BPAI Request</label> <textarea id="fraudBPAIRequest"></textarea>
+      </div>
+     </div>
+     <div class="form-grid full">
+      <div class="form-group-modal"><label for="fraudBPAIContact">BPAI Contact</label> <textarea id="fraudBPAIContact"></textarea>
+      </div>
+     </div>
+     <div class="form-grid">
+      <div class="form-group-modal" style="flex-direction: row; align-items: center; gap: 10px;"><input type="checkbox" id="fraudIsConfidential" style="width: 18px; height: 18px; cursor: pointer;"> <label for="fraudIsConfidential" style="margin-bottom: 0; cursor: pointer;">Mark as Confidential</label>
+      </div>
+     </div>
+     <div class="form-grid full">
+      <div class="form-group-modal"><label>Attach Documents</label>
+       <div id="documentUploadArea" style="border: 2px dashed #0066cc; border-radius: 6px; padding: 20px; text-align: center; background-color: #f7fafc; cursor: pointer; transition: background-color 0.2s;"><i data-lucide="upload" style="width: 24px; height: 24px; color: #0066cc; margin-bottom: 8px; display: block;"></i>
+        <p style="color: #0066cc; margin: 0; font-weight: 600;">Click to upload or drag documents here</p>
+        <p style="color: #4a5568; font-size: 12px; margin: 4px 0 0 0;">PDF, DOC, DOCX, XLS, XLSX, JPG, PNG</p><input type="file" id="documentInput" style="display: none;" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png">
+       </div>
+       <div id="documentList" style="margin-top: 15px;"></div>
+      </div>
+     </div>
+     <div class="modal-buttons"><button type="button" class="btn-cancel" onclick="closeFraudCaseModal()">Cancel</button> <button type="submit" class="btn-save">Save Case</button>
+     </div>
+    </form>
+   </div>
+  </div><!-- CCL Modal -->
+  <div id="cclModal" class="modal">
+   <div class="modal-content">
+    <div class="modal-header">
+     <h3>Add CCL Record</h3><button class="close-modal" onclick="closeCCLModal()">×</button>
+    </div>
+    <form id="cclForm">
+     <div class="form-grid">
+      <div class="form-group-modal"><label for="cclDate">Date</label> <input type="date" id="cclDate" required>
+      </div>
+      <div class="form-group-modal"><label for="cclProviderID">Provider ID</label> <input type="number" id="cclProviderID" required>
+      </div>
+     </div>
+     <div class="form-grid">
+      <div class="form-group-modal"><label for="cclProviderName">Provider Name</label> <input type="text" id="cclProviderName" required>
+      </div>
+      <div class="form-group-modal"><label for="cclProviderLic">Provider Lic #</label> <input type="text" id="cclProviderLic">
+      </div>
+     </div>
+     <div class="form-grid">
+      <div class="form-group-modal"><label for="cclLPA">LPA</label> <select id="cclLPA" required> <option value="">Select LPA</option> <option>Region A</option> <option>Region B</option> <option>Region C</option> <option>Region D</option> </select>
+      </div>
+      <div class="form-group-modal"><label for="cclProviderStatus">Provider Status</label> <select id="cclProviderStatus" required> <option value="">Select Status</option> <option>Active</option> <option>Probation</option> <option>Suspended</option> <option>Terminated</option> </select>
+      </div>
+     </div>
+     <div class="form-grid">
+      <div class="form-group-modal"><label for="cclVisitDate">Visit Date</label> <input type="date" id="cclVisitDate">
+      </div>
+      <div class="form-group-modal"><label for="cclVisitTime">Visit Time</label> <input type="time" id="cclVisitTime">
+      </div>
+     </div>
+     <div class="form-grid full">
+      <div class="form-group-modal"><label for="cclFamilyOfConcern">Family of Concern</label> <textarea id="cclFamilyOfConcern"></textarea>
+      </div>
+     </div>
+     <div class="form-grid full">
+      <div class="form-group-modal"><label for="cclCensus">Census</label> <textarea id="cclCensus"></textarea>
+      </div>
+     </div>
+     <div class="form-grid full">
+      <div class="form-group-modal"><label for="cclNotes">Notes</label> <textarea id="cclNotes"></textarea>
+      </div>
+     </div>
+     <div class="form-grid">
+      <div class="form-group-modal"><label for="cclSent">Sent</label> <input type="text" id="cclSent">
+      </div>
+      <div class="form-group-modal"><label for="cclRequestedDocs">Requested Docs or Info</label> <select id="cclRequestedDocs"> <option value="">Select Document</option> <option>Financial Records</option> <option>Personnel Files</option> <option>Licenses/Certifications</option> <option>Correspondence</option> </select>
+      </div>
+     </div>
+     <div class="form-grid full">
+      <div class="form-group-modal"><label for="cclPublicNotes">Public Notes</label> <textarea id="cclPublicNotes"></textarea>
+      </div>
+     </div>
+     <div class="modal-buttons"><button type="button" class="btn-cancel" onclick="closeCCLModal()">Cancel</button> <button type="submit" class="btn-save">Save Record</button>
+     </div>
+    </form>
+   </div>
+  </div><!-- Fraud Case Detail Modal -->
+  <div id="fraudCaseDetailModal" class="modal">
+   <div class="modal-content">
+    <div class="modal-header">
+     <h3 id="detailCaseTitle">Case Details</h3><button class="close-modal" onclick="closeDetailModal()">×</button>
+    </div>
+    <div id="fraudCaseDetailContent"></div>
+    <div class="modal-buttons">
+     <button type="button" class="btn-cancel" onclick="closeDetailModal()">Close</button> <button type="button" class="report-btn" id="printCaseFromDetailBtn" style="padding: 10px 20px; gap: 8px; background-color: #6c757d;"> <i data-lucide="printer" style="width: 16px; height: 16px;"></i> Print PDF </button> <button type="button" class="edit-btn" id="editCaseFromDetailBtn" style="padding: 10px 20px; gap: 8px;"> <i data-lucide="edit" style="width: 16px; height: 16px;"></i> Edit </button> <button type="button" class="delete-btn" id="deleteCaseFromDetailBtn" style="padding: 10px 20px; gap: 8px;"> <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i> Delete </button>
+    </div>
+   </div>
+  </div><!-- CCL Record Detail Modal -->
+  <div id="cclDetailModal" class="modal">
+   <div class="modal-content">
+    <div class="modal-header">
+     <h3 id="detailRecordTitle">Record Details</h3><button class="close-modal" onclick="closeDetailModal()">×</button>
+    </div>
+    <div id="cclDetailContent"></div>
+    <div class="modal-buttons">
+     <button type="button" class="btn-cancel" onclick="closeDetailModal()">Close</button> <button type="button" class="report-btn" id="printRecordFromDetailBtn" style="padding: 10px 20px; gap: 8px; background-color: #6c757d;"> <i data-lucide="printer" style="width: 16px; height: 16px;"></i> Print PDF </button> <button type="button" class="edit-btn" id="editRecordFromDetailBtn" style="padding: 10px 20px; gap: 8px;"> <i data-lucide="edit" style="width: 16px; height: 16px;"></i> Edit </button> <button type="button" class="delete-btn" id="deleteRecordFromDetailBtn" style="padding: 10px 20px; gap: 8px;"> <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i> Delete </button>
+    </div>
+   </div>
+  </div>
+  <script>
+    // Data Storage
+    let fraudCases = [];
+    let cclRecords = [];
+    let currentUser = null;
+    let isLoading = false;
+    let fraudSearchResults = null;
+    let cclSearchResults = null;
+    let currentDetailCase = null;
+    let currentDetailRecord = null;
+    let currentDocuments = []; // Track documents for current case being edited
+
+    // Data SDK Handler
+    const dataHandler = {
+      onDataChanged(data) {
+        fraudCases = data.filter(item => item.recordType === 'fraudCase');
+        cclRecords = data.filter(item => item.recordType === 'cclRecord');
+        refreshFraudCasesTable();
+        refreshCCLTable();
+        updateDashboard();
+      }
+    };
+
+    // Initialize Data SDK
+    async function initializeDataSDK() {
+      const result = await window.dataSdk.init(dataHandler);
+      if (!result.isOk) {
+        console.error('Failed to initialize Data SDK');
+      }
+    }
+
+    // Login functionality
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const username = document.getElementById('username').value;
+      currentUser = username;
+      
+      // Hide login, show app
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('mainApp').classList.add('active');
+      document.getElementById('userDisplay').textContent = `User: ${username}`;
+      
+      // Setup tabs and initialize UI
+      setupTabSwitching();
+      lucide.createIcons();
+      
+      // Initialize Data SDK after login
+      await initializeDataSDK();
+    });
+
+    // Logout functionality
+    document.getElementById('logoutBtn').addEventListener('click', function() {
+      document.getElementById('loginScreen').style.display = 'flex';
+      document.getElementById('mainApp').classList.remove('active');
+      document.getElementById('username').value = '';
+      document.getElementById('password').value = '';
+      currentUser = null;
+      fraudCases = [];
+      cclRecords = [];
+      refreshFraudCasesTable();
+      refreshCCLTable();
+    });
+
+    // Tab switching
+    function setupTabSwitching() {
+      document.querySelectorAll('.tab-button').forEach(button => {
+        button.addEventListener('click', function() {
+          const tabName = this.getAttribute('data-tab');
+          
+          // Remove active class from all buttons
+          document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+          
+          // Hide all tab content
+          document.querySelectorAll('.tab-content').forEach(content => {
+            content.classList.remove('active');
+          });
+          
+          // Add active class to clicked button
+          this.classList.add('active');
+          
+          // Show the selected tab content - map tab names to IDs
+          let tabId;
+          if (tabName === 'dashboard') {
+            tabId = 'dashboardTab';
+          } else if (tabName === 'fraud-cases') {
+            tabId = 'fraudCasesTab';
+          } else if (tabName === 'ccl-records') {
+            tabId = 'cclRecordsTab';
+          } else if (tabName === 'reference-data') {
+            tabId = 'referenceDataTab';
+          }
+          
+          const tabContent = document.getElementById(tabId);
+          if (tabContent) {
+            tabContent.classList.add('active');
+          }
+          
+          // Refresh tables for the active tab
+          if (tabName === 'fraud-cases') {
+            refreshFraudCasesTable();
+          } else if (tabName === 'ccl-records') {
+            refreshCCLTable();
+          }
+          
+          lucide.createIcons();
+        });
+      });
+    }
+
+    // Dashboard Functions
+    function updateDashboard() {
+      const openCount = fraudCases.filter(c => c.status === 'Open').length;
+      const investigationCount = fraudCases.filter(c => c.status === 'Under Investigation').length;
+      const closedCount = fraudCases.filter(c => c.status === 'Closed').length;
+      const totalCount = fraudCases.length;
+
+      document.getElementById('openCasesCount').textContent = openCount;
+      document.getElementById('investigationCasesCount').textContent = investigationCount;
+      document.getElementById('closedCasesCount').textContent = closedCount;
+      document.getElementById('totalCasesCount').textContent = totalCount;
+    }
+
+    // Report Download Functions
+    function downloadCSVReport() {
+      if (fraudCases.length === 0) {
+        showNotification('No cases to export', 'error');
+        return;
+      }
+
+      let csv = 'Case #,Case Name,Date,Type,Source,Status,Potential O/P\n';
+      fraudCases.forEach(caseItem => {
+        csv += `"${caseItem.caseNum}","${caseItem.caseName}","${caseItem.date}","${caseItem.caseType}","${caseItem.allegationSource}","${caseItem.status}","$${parseFloat(caseItem.potentialOP || 0).toFixed(2)}"\n`;
+      });
+
+      const element = document.createElement('a');
+      element.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv));
+      element.setAttribute('download', `fraud-cases-${new Date().toISOString().split('T')[0]}.csv`);
+      element.style.display = 'none';
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
+      showNotification('CSV report downloaded successfully', 'success');
+    }
+
+    function downloadExcelReport() {
+      if (fraudCases.length === 0) {
+        showNotification('No cases to export', 'error');
+        return;
+      }
+
+      let html = '<table border="1"><tr><th>Case #</th><th>Case Name</th><th>Date</th><th>Type</th><th>Source</th><th>Status</th><th>Potential O/P</th></tr>';
+      fraudCases.forEach(caseItem => {
+        html += `<tr><td>${caseItem.caseNum}</td><td>${caseItem.caseName}</td><td>${caseItem.date}</td><td>${caseItem.caseType}</td><td>${caseItem.allegationSource}</td><td>${caseItem.status}</td><td>$${parseFloat(caseItem.potentialOP || 0).toFixed(2)}</td></tr>`;
+      });
+      html += '</table>';
+
+      const element = document.createElement('a');
+      element.setAttribute('href', 'data:application/vnd.ms-excel;charset=utf-8,' + encodeURIComponent(html));
+      element.setAttribute('download', `fraud-cases-${new Date().toISOString().split('T')[0]}.xls`);
+      element.style.display = 'none';
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
+      showNotification('Excel report downloaded successfully', 'success');
+    }
+
+    function generatePDFReport() {
+      if (fraudCases.length === 0) {
+        showNotification('No cases to export', 'error');
+        return;
+      }
+
+      let pdfContent = 'FRAUD CASE TRACKING REPORT\n';
+      pdfContent += `Generated: ${new Date().toLocaleDateString()}\n\n`;
+      pdfContent += `Total Cases: ${fraudCases.length}\n`;
+      pdfContent += `Open: ${fraudCases.filter(c => c.status === 'Open').length}\n`;
+      pdfContent += `Under Investigation: ${fraudCases.filter(c => c.status === 'Under Investigation').length}\n`;
+      pdfContent += `Closed: ${fraudCases.filter(c => c.status === 'Closed').length}\n\n`;
+      pdfContent += 'CASE DETAILS:\n';
+      pdfContent += '='.repeat(80) + '\n';
+
+      fraudCases.forEach(caseItem => {
+        pdfContent += `Case #: ${caseItem.caseNum}\n`;
+        pdfContent += `Name: ${caseItem.caseName}\n`;
+        pdfContent += `Status: ${caseItem.status}\n`;
+        pdfContent += `Type: ${caseItem.caseType}\n`;
+        pdfContent += `Potential O/P: $${parseFloat(caseItem.potentialOP || 0).toFixed(2)}\n`;
+        pdfContent += '-'.repeat(80) + '\n';
+      });
+
+      const element = document.createElement('a');
+      element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(pdfContent));
+      element.setAttribute('download', `fraud-cases-report-${new Date().toISOString().split('T')[0]}.txt`);
+      element.style.display = 'none';
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
+      showNotification('Report generated successfully', 'success');
+    }
+
+    function printReport() {
+      if (fraudCases.length === 0) {
+        showNotification('No cases to print', 'error');
+        return;
+      }
+
+      let printWindow = window.open('', '', 'height=600,width=900');
+      printWindow.document.write('<html><head><title>Fraud Cases Report</title>');
+      printWindow.document.write('<style>table { border-collapse: collapse; width: 100%; } th, td { border: 1px solid #000; padding: 8px; text-align: left; } th { background-color: #f0f0f0; }</style>');
+      printWindow.document.write('</head><body>');
+      printWindow.document.write('<h1>Fraud Case Tracking Report</h1>');
+      printWindow.document.write(`<p>Generated: ${new Date().toLocaleDateString()}</p>`);
+      printWindow.document.write('<table><tr><th>Case #</th><th>Case Name</th><th>Date</th><th>Type</th><th>Source</th><th>Status</th><th>Potential O/P</th></tr>');
+      
+      fraudCases.forEach(caseItem => {
+        printWindow.document.write(`<tr><td>${caseItem.caseNum}</td><td>${caseItem.caseName}</td><td>${caseItem.date}</td><td>${caseItem.caseType}</td><td>${caseItem.allegationSource}</td><td>${caseItem.status}</td><td>$${parseFloat(caseItem.potentialOP || 0).toFixed(2)}</td></tr>`);
+      });
+      
+      printWindow.document.write('</table></body></html>');
+      printWindow.document.close();
+      printWindow.print();
+    }
+
+    // Search Functions
+    function performGlobalSearch() {
+      const searchTerm = document.getElementById('globalSearchInput').value.toLowerCase().trim();
+      if (!searchTerm) {
+        showNotification('Please enter a search term', 'error');
+        return;
+      }
+
+      // Search across all records
+      const fraudMatches = fraudCases.filter(caseItem => 
+        caseItem.caseNum.toString().includes(searchTerm) ||
+        caseItem.caseName.toLowerCase().includes(searchTerm) ||
+        caseItem.status.toLowerCase().includes(searchTerm) ||
+        caseItem.caseType.toLowerCase().includes(searchTerm)
+      );
+
+      const cclMatches = cclRecords.filter(record => 
+        record.providerID.toString().includes(searchTerm) ||
+        record.providerName.toLowerCase().includes(searchTerm) ||
+        record.lpa.toLowerCase().includes(searchTerm) ||
+        record.providerStatus.toLowerCase().includes(searchTerm)
+      );
+
+      const totalMatches = fraudMatches.length + cclMatches.length;
+
+      if (totalMatches === 0) {
+        showNotification(`No results found for "${searchTerm}"`, 'error');
+        return;
+      }
+
+      // Show results and switch to appropriate tab
+      if (fraudMatches.length > 0) {
+        fraudSearchResults = fraudMatches;
+        document.getElementById('fraudSearchInfo').textContent = `Found ${fraudMatches.length} fraud case(s)${cclMatches.length > 0 ? ` and ${cclMatches.length} CCL record(s)` : ''}`;
+        
+        // Switch to fraud cases tab
+        document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+        document.querySelector('[data-tab="fraud-cases"]').classList.add('active');
+        document.getElementById('fraudCasesTab').classList.add('active');
+        refreshFraudCasesTable();
+      } else if (cclMatches.length > 0) {
+        cclSearchResults = cclMatches;
+        document.getElementById('cclSearchInfo').textContent = `Found ${cclMatches.length} CCL record(s)`;
+        
+        // Switch to CCL records tab
+        document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+        document.querySelector('[data-tab="ccl-records"]').classList.add('active');
+        document.getElementById('cclRecordsTab').classList.add('active');
+        refreshCCLTable();
+      }
+
+      showNotification(`Found ${totalMatches} result(s) for "${searchTerm}"`, 'success');
+      lucide.createIcons();
+    }
+
+    // Allow Enter key in global search
+    document.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter' && e.target.id === 'globalSearchInput') {
+        performGlobalSearch();
+      }
+    });
+
+    function searchFraudCases() {
+      const searchTerm = document.getElementById('caseSearchInput').value.toLowerCase();
+      if (!searchTerm) {
+        clearFraudSearch();
+        return;
+      }
+
+      fraudSearchResults = fraudCases.filter(caseItem => 
+        caseItem.caseNum.toString().includes(searchTerm) ||
+        caseItem.caseName.toLowerCase().includes(searchTerm) ||
+        caseItem.status.toLowerCase().includes(searchTerm) ||
+        caseItem.caseType.toLowerCase().includes(searchTerm)
+      );
+
+      document.getElementById('fraudSearchInfo').textContent = `Found ${fraudSearchResults.length} result(s) for "${searchTerm}"`;
+      refreshFraudCasesTable();
+    }
+
+    function clearFraudSearch() {
+      document.getElementById('caseSearchInput').value = '';
+      document.getElementById('fraudSearchInfo').textContent = '';
+      fraudSearchResults = null;
+      refreshFraudCasesTable();
+    }
+
+    function searchCCLRecords() {
+      const searchTerm = document.getElementById('cclSearchInput').value.toLowerCase();
+      if (!searchTerm) {
+        clearCCLSearch();
+        return;
+      }
+
+      cclSearchResults = cclRecords.filter(record => 
+        record.providerID.toString().includes(searchTerm) ||
+        record.providerName.toLowerCase().includes(searchTerm) ||
+        record.lpa.toLowerCase().includes(searchTerm) ||
+        record.providerStatus.toLowerCase().includes(searchTerm)
+      );
+
+      document.getElementById('cclSearchInfo').textContent = `Found ${cclSearchResults.length} result(s) for "${searchTerm}"`;
+      refreshCCLTable();
+    }
+
+    function clearCCLSearch() {
+      document.getElementById('cclSearchInput').value = '';
+      document.getElementById('cclSearchInfo').textContent = '';
+      cclSearchResults = null;
+      refreshCCLTable();
+    }
+
+    function showNotification(message, type) {
+      const notification = document.createElement('div');
+      notification.style.position = 'fixed';
+      notification.style.top = '20px';
+      notification.style.right = '20px';
+      notification.style.padding = '15px 20px';
+      notification.style.borderRadius = '6px';
+      notification.style.zIndex = '2000';
+      notification.style.fontWeight = '600';
+      notification.style.animation = 'slideIn 0.3s ease-out';
+
+      if (type === 'success') {
+        notification.style.backgroundColor = '#d4edda';
+        notification.style.color = '#155724';
+        notification.style.borderLeft = '4px solid #28a745';
+      } else {
+        notification.style.backgroundColor = '#f8d7da';
+        notification.style.color = '#721c24';
+        notification.style.borderLeft = '4px solid #dc3545';
+      }
+
+      notification.textContent = message;
+      document.body.appendChild(notification);
+
+      setTimeout(() => {
+        notification.remove();
+      }, 3000);
+    }
+
+    // Fraud Case Modal Functions
+    function openFraudCaseModal() {
+      document.getElementById('fraudCaseForm').reset();
+      currentDocuments = [];
+      renderDocumentList();
+      document.getElementById('fraudCaseModal').classList.add('active');
+      setupDocumentUpload();
+    }
+
+    function closeFraudCaseModal() {
+      document.getElementById('fraudCaseForm').reset();
+      document.getElementById('fraudCaseForm').dataset.editingId = '';
+      document.querySelector('#fraudCaseModal .modal-header h3').textContent = 'Add New Fraud Case';
+      currentDocuments = [];
+      document.getElementById('fraudCaseModal').classList.remove('active');
+    }
+
+    document.getElementById('fraudCaseForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      if (isLoading) return;
+      isLoading = true;
+      
+      const editingId = this.dataset.editingId;
+      const isEdit = !!editingId && editingId.length > 0;
+      const originalCase = isEdit ? JSON.parse(this.dataset.editingCase) : null;
+      
+      const caseData = {
+        date: document.getElementById('fraudDate').value,
+        caseNum: document.getElementById('fraudCaseNum').value,
+        caseName: document.getElementById('fraudCaseName').value,
+        caseType: document.getElementById('fraudCaseType').value,
+        allegationSource: document.getElementById('fraudAllegationSource').value,
+        status: document.getElementById('fraudStatus').value,
+        allegation: document.getElementById('fraudAllegation').value,
+        potentialOP: document.getElementById('fraudPotentialOP').value,
+        connectionNum: document.getElementById('fraudConnectionNum').value,
+        relationship: document.getElementById('fraudRelationship').value,
+        outcome: document.getElementById('fraudOutcome').value,
+        connections: document.getElementById('fraudConnections').value,
+        allegationContact: document.getElementById('fraudAllegationContact').value,
+        notes: document.getElementById('fraudNotes').value,
+        publicNotes: document.getElementById('fraudPublicNotes').value,
+        bpaiRequest: document.getElementById('fraudBPAIRequest').value,
+        bpaiContact: document.getElementById('fraudBPAIContact').value,
+        isConfidential: document.getElementById('fraudIsConfidential').checked ? 'true' : 'false',
+        documents: JSON.stringify(currentDocuments),
+        recordType: 'fraudCase'
+      };
+      
+      let result;
+      if (isEdit) {
+        const updatedCase = { ...originalCase, ...caseData };
+        result = await window.dataSdk.update(updatedCase);
+      } else {
+        const newCase = { id: 'case_' + Date.now(), ...caseData };
+        result = await window.dataSdk.create(newCase);
+      }
+      
+      isLoading = false;
+      
+      if (result.isOk) {
+        showNotification(isEdit ? 'Case updated successfully' : 'Case saved successfully', 'success');
+        closeFraudCaseModal();
+      } else {
+        showNotification(isEdit ? 'Failed to update case' : 'Failed to save fraud case', 'error');
+      }
+    });
+
+    function refreshFraudCasesTable() {
+      const tbody = document.getElementById('fraudCasesBody');
+      const displayData = fraudSearchResults || fraudCases;
+      
+      if (displayData.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 40px; color: #4a5568;">No cases found. Click "New Case" to add one.</td></tr>';
+        return;
+      }
+      
+      tbody.innerHTML = displayData.map(caseItem => `
+        <tr>
+          <td><span class="clickable-record" onclick="showFraudCaseDetail('${caseItem.__backendId}')">${caseItem.caseNum}</span></td>
+          <td><span class="clickable-record" onclick="showFraudCaseDetail('${caseItem.__backendId}')">${caseItem.caseName}</span></td>
+          <td>${caseItem.date}</td>
+          <td>${caseItem.caseType}</td>
+          <td>${caseItem.allegationSource}</td>
+          <td>${caseItem.status}</td>
+          <td>$${parseFloat(caseItem.potentialOP || 0).toFixed(2)}</td>
+          <td>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              ${caseItem.isConfidential === 'true' ? '<i data-lucide="lock" style="width: 14px; height: 14px; color: #dc3545;" title="Confidential"></i>' : ''}
+              <div class="action-buttons">
+                <button class="edit-btn" onclick="editFraudCase('${caseItem.__backendId}')">
+                  <i data-lucide="edit" style="width: 14px; height: 14px;"></i> Edit
+                </button>
+                <button class="delete-btn" onclick="deleteFraudCase('${caseItem.__backendId}')">
+                  <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i> Delete
+                </button>
+              </div>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+      
+      lucide.createIcons();
+    }
+
+    function deleteFraudCase(id) {
+      const caseItem = fraudCases.find(c => c.__backendId === id);
+      if (!caseItem) return;
+      
+      isLoading = true;
+      window.dataSdk.delete(caseItem).then(result => {
+        isLoading = false;
+        if (result.isOk) {
+          showNotification('Case deleted successfully', 'success');
+        } else {
+          showNotification('Failed to delete case', 'error');
+        }
+      });
+    }
+
+    function editFraudCase(id) {
+      const caseItem = fraudCases.find(c => c.__backendId === id);
+      if (!caseItem) {
+        showNotification('Could not load case data', 'error');
+        return;
+      }
+      
+      document.getElementById('fraudDate').value = caseItem.date || '';
+      document.getElementById('fraudCaseNum').value = caseItem.caseNum || '';
+      document.getElementById('fraudCaseName').value = caseItem.caseName || '';
+      document.getElementById('fraudCaseType').value = caseItem.caseType || '';
+      document.getElementById('fraudAllegationSource').value = caseItem.allegationSource || '';
+      document.getElementById('fraudStatus').value = caseItem.status || '';
+      document.getElementById('fraudAllegation').value = caseItem.allegation || '';
+      document.getElementById('fraudPotentialOP').value = caseItem.potentialOP || '';
+      document.getElementById('fraudConnectionNum').value = caseItem.connectionNum || '';
+      document.getElementById('fraudRelationship').value = caseItem.relationship || '';
+      document.getElementById('fraudOutcome').value = caseItem.outcome || '';
+      document.getElementById('fraudConnections').value = caseItem.connections || '';
+      document.getElementById('fraudAllegationContact').value = caseItem.allegationContact || '';
+      document.getElementById('fraudNotes').value = caseItem.notes || '';
+      document.getElementById('fraudPublicNotes').value = caseItem.publicNotes || '';
+      document.getElementById('fraudBPAIRequest').value = caseItem.bpaiRequest || '';
+      document.getElementById('fraudBPAIContact').value = caseItem.bpaiContact || '';
+      document.getElementById('fraudIsConfidential').checked = caseItem.isConfidential === 'true';
+      
+      // Load existing documents
+      currentDocuments = caseItem.documents ? JSON.parse(caseItem.documents) : [];
+      renderDocumentList();
+      
+      document.querySelector('#fraudCaseModal .modal-header h3').textContent = 'Edit Fraud Case';
+      document.getElementById('fraudCaseForm').dataset.editingId = id;
+      document.getElementById('fraudCaseForm').dataset.editingCase = JSON.stringify(caseItem);
+      
+      document.getElementById('fraudCaseModal').classList.add('active');
+      setupDocumentUpload();
+    }
+
+    // CCL Modal Functions
+    function openCCLModal() {
+      document.getElementById('cclForm').reset();
+      document.getElementById('cclModal').classList.add('active');
+    }
+
+    function closeCCLModal() {
+      document.getElementById('cclForm').reset();
+      document.getElementById('cclForm').dataset.editingId = '';
+      document.querySelector('#cclModal .modal-header h3').textContent = 'Add CCL Record';
+      document.getElementById('cclModal').classList.remove('active');
+    }
+
+    document.getElementById('cclForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      if (isLoading) return;
+      isLoading = true;
+      
+      const editingId = this.dataset.editingId;
+      const isEdit = !!editingId && editingId.length > 0;
+      const originalRecord = isEdit ? JSON.parse(this.dataset.editingRecord) : null;
+      
+      const recordData = {
+        date: document.getElementById('cclDate').value,
+        providerID: document.getElementById('cclProviderID').value,
+        providerName: document.getElementById('cclProviderName').value,
+        providerLic: document.getElementById('cclProviderLic').value,
+        lpa: document.getElementById('cclLPA').value,
+        providerStatus: document.getElementById('cclProviderStatus').value,
+        visitDate: document.getElementById('cclVisitDate').value,
+        visitTime: document.getElementById('cclVisitTime').value,
+        familyOfConcern: document.getElementById('cclFamilyOfConcern').value,
+        census: document.getElementById('cclCensus').value,
+        notes: document.getElementById('cclNotes').value,
+        sent: document.getElementById('cclSent').value,
+        requestedDocs: document.getElementById('cclRequestedDocs').value,
+        publicNotes: document.getElementById('cclPublicNotes').value,
+        recordType: 'cclRecord'
+      };
+      
+      let result;
+      if (isEdit) {
+        const updatedRecord = { ...originalRecord, ...recordData };
+        result = await window.dataSdk.update(updatedRecord);
+      } else {
+        const newRecord = { id: 'ccl_' + Date.now(), ...recordData };
+        result = await window.dataSdk.create(newRecord);
+      }
+      
+      isLoading = false;
+      
+      if (result.isOk) {
+        showNotification(isEdit ? 'Record updated successfully' : 'Record saved successfully', 'success');
+        closeCCLModal();
+      } else {
+        showNotification(isEdit ? 'Failed to update record' : 'Failed to save CCL record', 'error');
+      }
+    });
+
+    function refreshCCLTable() {
+      const tbody = document.getElementById('cclTableBody');
+      const displayData = cclSearchResults || cclRecords;
+      
+      if (displayData.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px; color: #4a5568;">No CCL records found. Click "New Record" to add one.</td></tr>';
+        return;
+      }
+      
+      tbody.innerHTML = displayData.map(record => `
+        <tr>
+          <td>${record.providerID}</td>
+          <td><span class="clickable-record" onclick="showCCLRecordDetail('${record.__backendId}')">${record.providerName}</span></td>
+          <td>${record.date}</td>
+          <td>${record.lpa}</td>
+          <td>${record.providerStatus}</td>
+          <td>${record.visitDate}</td>
+          <td>
+            <div class="action-buttons">
+              <button class="edit-btn" onclick="editCCLRecord('${record.__backendId}')">
+                <i data-lucide="edit" style="width: 14px; height: 14px;"></i> Edit
+              </button>
+              <button class="delete-btn" onclick="deleteCCLRecord('${record.__backendId}')">
+                <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i> Delete
+              </button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+      
+      lucide.createIcons();
+    }
+
+    function deleteCCLRecord(id) {
+      const record = cclRecords.find(r => r.__backendId === id);
+      if (!record) return;
+      
+      isLoading = true;
+      window.dataSdk.delete(record).then(result => {
+        isLoading = false;
+        if (result.isOk) {
+          showNotification('Record deleted successfully', 'success');
+        } else {
+          showNotification('Failed to delete record', 'error');
+        }
+      });
+    }
+
+    function editCCLRecord(id) {
+      const record = cclRecords.find(r => r.__backendId === id);
+      if (!record) {
+        showNotification('Could not load record data', 'error');
+        return;
+      }
+      
+      document.getElementById('cclDate').value = record.date || '';
+      document.getElementById('cclProviderID').value = record.providerID || '';
+      document.getElementById('cclProviderName').value = record.providerName || '';
+      document.getElementById('cclProviderLic').value = record.providerLic || '';
+      document.getElementById('cclLPA').value = record.lpa || '';
+      document.getElementById('cclProviderStatus').value = record.providerStatus || '';
+      document.getElementById('cclVisitDate').value = record.visitDate || '';
+      document.getElementById('cclVisitTime').value = record.visitTime || '';
+      document.getElementById('cclFamilyOfConcern').value = record.familyOfConcern || '';
+      document.getElementById('cclCensus').value = record.census || '';
+      document.getElementById('cclNotes').value = record.notes || '';
+      document.getElementById('cclSent').value = record.sent || '';
+      document.getElementById('cclRequestedDocs').value = record.requestedDocs || '';
+      document.getElementById('cclPublicNotes').value = record.publicNotes || '';
+      
+      document.querySelector('#cclModal .modal-header h3').textContent = 'Edit CCL Record';
+      document.getElementById('cclForm').dataset.editingId = id;
+      document.getElementById('cclForm').dataset.editingRecord = JSON.stringify(record);
+      
+      document.getElementById('cclModal').classList.add('active');
+    }
+
+    // Initialize on page load
+    window.addEventListener('load', function() {
+      lucide.createIcons();
+      
+      // Only setup tabs after login, when form exists
+      const loginForm = document.getElementById('loginForm');
+      if (loginForm) {
+        // Tabs will be set up after successful login
+      }
+    });
+
+    // Document Upload Functions
+    function setupDocumentUpload() {
+      const uploadArea = document.getElementById('documentUploadArea');
+      const documentInput = document.getElementById('documentInput');
+      
+      if (!uploadArea || !documentInput) return;
+
+      // Click to upload
+      uploadArea.addEventListener('click', () => documentInput.click());
+
+      // File input change
+      documentInput.addEventListener('change', function(e) {
+        handleFiles(e.target.files);
+      });
+
+      // Drag and drop
+      uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.style.backgroundColor = '#e8f2ff';
+      });
+
+      uploadArea.addEventListener('dragleave', () => {
+        uploadArea.style.backgroundColor = '#f7fafc';
+      });
+
+      uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.style.backgroundColor = '#f7fafc';
+        handleFiles(e.dataTransfer.files);
+      });
+    }
+
+    function handleFiles(files) {
+      const validTypes = ['application/pdf', 'application/msword', 
+                         'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                         'application/vnd.ms-excel',
+                         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                         'image/jpeg', 'image/png', 'image/jpg'];
+
+      for (let file of files) {
+        if (validTypes.includes(file.type)) {
+          // Store file metadata (name, size, type)
+          currentDocuments.push({
+            name: file.name,
+            size: (file.size / 1024).toFixed(2) + ' KB',
+            type: file.type,
+            id: Date.now() + Math.random()
+          });
+        } else {
+          showNotification(`Invalid file type: ${file.name}. Allowed: PDF, DOC, DOCX, XLS, XLSX, JPG, PNG`, 'error');
+        }
+      }
+
+      renderDocumentList();
+      document.getElementById('documentInput').value = '';
+    }
+
+    function renderDocumentList() {
+      const listContainer = document.getElementById('documentList');
+      if (!listContainer) return;
+
+      if (currentDocuments.length === 0) {
+        listContainer.innerHTML = '';
+        return;
+      }
+
+      listContainer.innerHTML = `
+        <div style="background-color: #f7fafc; border-radius: 6px; padding: 12px;">
+          <p style="color: #2d3748; font-weight: 600; margin-bottom: 10px; font-size: 13px;">Attached Documents (${currentDocuments.length})</p>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            ${currentDocuments.map(doc => `
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; background-color: white; border: 1px solid #e2e8f0; border-radius: 4px;">
+                <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
+                  <i data-lucide="file" style="width: 14px; height: 14px; color: #0066cc; flex-shrink: 0;"></i>
+                  <div style="flex: 1; min-width: 0;">
+                    <p style="color: #2d3748; font-size: 13px; margin: 0; word-break: break-word; text-overflow: ellipsis; overflow: hidden;">${doc.name}</p>
+                    <p style="color: #4a5568; font-size: 11px; margin: 2px 0 0 0;">${doc.size}</p>
+                  </div>
+                </div>
+                <button type="button" onclick="removeDocument('${doc.id}')" style="padding: 4px 8px; background-color: #f8d7da; color: #721c24; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600; flex-shrink: 0; margin-left: 8px;">Remove</button>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+      lucide.createIcons();
+    }
+
+    function removeDocument(docId) {
+      currentDocuments = currentDocuments.filter(doc => doc.id !== docId);
+      renderDocumentList();
+      showNotification('Document removed', 'success');
+    }
+
+    function downloadDocument(docName, docType) {
+      // Create a text document with the document metadata
+      let content = `Document Information\n`;
+      content += `========================\n\n`;
+      content += `Document Name: ${docName}\n`;
+      content += `Document Type: ${docType}\n`;
+      content += `Downloaded: ${new Date().toLocaleString()}\n\n`;
+      content += `Note: This file was attached to a Fraud Case in the tracking system.`;
+      
+      const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      
+      link.setAttribute('href', url);
+      link.setAttribute('download', docName || 'document.txt');
+      link.style.display = 'none';
+      
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Clean up the URL object
+      setTimeout(() => URL.revokeObjectURL(url), 100);
+      
+      showNotification('Document downloaded: ' + docName, 'success');
+    }
+
+    // Close modals on outside click
+    window.addEventListener('click', function(event) {
+      const fraudModal = document.getElementById('fraudCaseModal');
+      const cclModal = document.getElementById('cclModal');
+      const fraudDetailModal = document.getElementById('fraudCaseDetailModal');
+      const cclDetailModal = document.getElementById('cclDetailModal');
+      
+      if (event.target == fraudModal) {
+        fraudModal.classList.remove('active');
+      }
+      if (event.target == cclModal) {
+        cclModal.classList.remove('active');
+      }
+      if (event.target == fraudDetailModal) {
+        fraudDetailModal.classList.remove('active');
+      }
+      if (event.target == cclDetailModal) {
+        cclDetailModal.classList.remove('active');
+      }
+    });
+
+    // Detail Modal Functions
+    function closeDetailModal() {
+      document.getElementById('fraudCaseDetailModal').classList.remove('active');
+      document.getElementById('cclDetailModal').classList.remove('active');
+      currentDetailCase = null;
+      currentDetailRecord = null;
+    }
+
+    function showFraudCaseDetail(id) {
+      const caseItem = fraudCases.find(c => c.__backendId === id);
+      if (!caseItem) {
+        showNotification('Could not load case details', 'error');
+        return;
+      }
+
+      currentDetailCase = caseItem;
+      const modal = document.getElementById('fraudCaseDetailModal');
+      const content = document.getElementById('fraudCaseDetailContent');
+
+      content.innerHTML = `
+        <div class="detail-grid">
+          <div class="detail-row">
+            <label>Case #</label>
+            <value>${caseItem.caseNum}</value>
+          </div>
+          <div class="detail-row">
+            <label>Case Name</label>
+            <value>${caseItem.caseName}</value>
+          </div>
+        </div>
+        <div class="detail-grid">
+          <div class="detail-row">
+            <label>Date</label>
+            <value>${caseItem.date}</value>
+          </div>
+          <div class="detail-row">
+            <label>Case Type</label>
+            <value>${caseItem.caseType}</value>
+          </div>
+        </div>
+        <div class="detail-grid">
+          <div class="detail-row">
+            <label>Allegation Source</label>
+            <value>${caseItem.allegationSource}</value>
+          </div>
+          <div class="detail-row">
+            <label>Status</label>
+            <value>${caseItem.status}</value>
+          </div>
+        </div>
+        <div class="detail-grid">
+          <div class="detail-row">
+            <label>Potential O/P ($)</label>
+            <value>$${parseFloat(caseItem.potentialOP || 0).toFixed(2)}</value>
+          </div>
+          <div class="detail-row">
+            <label>Connection #</label>
+            <value>${caseItem.connectionNum || 'N/A'}</value>
+          </div>
+        </div>
+        <div class="detail-grid">
+          <div class="detail-row">
+            <label>Relationship</label>
+            <value>${caseItem.relationship || 'N/A'}</value>
+          </div>
+          <div class="detail-row">
+            <label>Outcome</label>
+            <value>${caseItem.outcome || 'N/A'}</value>
+          </div>
+        </div>
+        <div class="detail-grid full">
+          <div class="detail-row">
+            <label>Allegation</label>
+            <value>${caseItem.allegation || 'N/A'}</value>
+          </div>
+        </div>
+        <div class="detail-grid full">
+          <div class="detail-row">
+            <label>Connections</label>
+            <value>${caseItem.connections || 'N/A'}</value>
+          </div>
+        </div>
+        <div class="detail-grid full">
+          <div class="detail-row">
+            <label>Allegation Contact</label>
+            <value>${caseItem.allegationContact || 'N/A'}</value>
+          </div>
+        </div>
+        <div class="detail-grid full">
+          <div class="detail-row">
+            <label>Notes</label>
+            <value>${caseItem.notes || 'N/A'}</value>
+          </div>
+        </div>
+        <div class="detail-grid full">
+          <div class="detail-row">
+            <label>Public Notes</label>
+            <value>${caseItem.publicNotes || 'N/A'}</value>
+          </div>
+        </div>
+        <div class="detail-grid full">
+          <div class="detail-row">
+            <label>BPAI Request</label>
+            <value>${caseItem.bpaiRequest || 'N/A'}</value>
+          </div>
+        </div>
+        <div class="detail-grid full">
+          <div class="detail-row">
+            <label>BPAI Contact</label>
+            <value>${caseItem.bpaiContact || 'N/A'}</value>
+          </div>
+        </div>
+        <div class="detail-grid">
+          <div class="detail-row">
+            <label>Confidential</label>
+            <value>${caseItem.isConfidential === 'true' ? '<span style="color: #dc3545; font-weight: 600;"><i data-lucide="lock" style="width: 14px; height: 14px; display: inline; vertical-align: middle;"></i> Yes</span>' : 'No'}</value>
+          </div>
+        </div>
+        ${caseItem.documents && JSON.parse(caseItem.documents).length > 0 ? `
+        <div class="detail-grid full">
+          <div class="detail-row">
+            <label>Attached Documents</label>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              ${JSON.parse(caseItem.documents).map((doc, idx) => `
+                <div style="display: flex; align-items: center; gap: 8px; padding: 8px; background-color: #f7fafc; border-radius: 4px;">
+                  <i data-lucide="file" style="width: 16px; height: 16px; color: #0066cc;"></i>
+                  <a href="javascript:void(0)" onclick="downloadDocument('${doc.name}', '${doc.type}')" style="color: #0066cc; text-decoration: none; cursor: pointer; flex: 1; word-break: break-word;" title="Click to download ${doc.name}">
+                    <span style="text-decoration: underline;">${doc.name}</span>
+                  </a>
+                  <span style="color: #4a5568; font-size: 12px; white-space: nowrap;">${doc.size}</span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+        ` : ''}
+      `;
+
+      document.getElementById('editCaseFromDetailBtn').onclick = function() {
+        closeDetailModal();
+        editFraudCase(id);
+      };
+
+      document.getElementById('deleteCaseFromDetailBtn').onclick = function() {
+        closeDetailModal();
+        deleteFraudCase(id);
+      };
+
+      document.getElementById('printCaseFromDetailBtn').onclick = function() {
+        printFraudCasePDF(caseItem);
+      };
+
+      modal.classList.add('active');
+      lucide.createIcons();
+    }
+
+    function printFraudCasePDF(caseItem) {
+      let printWindow = window.open('', '', 'height=800,width=1000');
+      printWindow.document.write('<html><head><title>Fraud Case Details - ' + caseItem.caseName + '</title>');
+      printWindow.document.write('<style>');
+      printWindow.document.write('body { font-family: Arial, sans-serif; margin: 20px; color: #333; }');
+      printWindow.document.write('h1 { color: #001f3f; border-bottom: 2px solid #0066cc; padding-bottom: 10px; }');
+      printWindow.document.write('h2 { color: #0066cc; margin-top: 30px; margin-bottom: 15px; border-bottom: 1px solid #ccc; padding-bottom: 5px; font-size: 16px; }');
+      printWindow.document.write('.detail-section { margin-bottom: 20px; }');
+      printWindow.document.write('.detail-row { display: grid; grid-template-columns: 200px 1fr; margin-bottom: 10px; }');
+      printWindow.document.write('.detail-label { font-weight: bold; color: #001f3f; }');
+      printWindow.document.write('.detail-value { padding-left: 20px; }');
+      printWindow.document.write('.page-break { page-break-after: always; }');
+      printWindow.document.write('.print-date { color: #666; font-size: 12px; margin-top: 30px; }');
+      printWindow.document.write('.document-list { margin-top: 10px; padding-left: 20px; }');
+      printWindow.document.write('.document-item { margin-bottom: 8px; padding: 8px; background-color: #f0f0f0; border-radius: 4px; }');
+      printWindow.document.write('.document-name { color: #0066cc; font-weight: bold; }');
+      printWindow.document.write('.document-size { color: #666; font-size: 12px; }');
+      printWindow.document.write('</style>');
+      printWindow.document.write('</head><body>');
+      
+      printWindow.document.write('<h1>Fraud Case Details</h1>');
+      printWindow.document.write('<div class="detail-section">');
+      printWindow.document.write('<div class="detail-row"><div class="detail-label">Case #:</div><div class="detail-value">' + caseItem.caseNum + '</div></div>');
+      printWindow.document.write('<div class="detail-row"><div class="detail-label">Case Name:</div><div class="detail-value">' + caseItem.caseName + '</div></div>');
+      printWindow.document.write('<div class="detail-row"><div class="detail-label">Date:</div><div class="detail-value">' + caseItem.date + '</div></div>');
+      printWindow.document.write('<div class="detail-row"><div class="detail-label">Case Type:</div><div class="detail-value">' + caseItem.caseType + '</div></div>');
+      printWindow.document.write('<div class="detail-row"><div class="detail-label">Allegation Source:</div><div class="detail-value">' + caseItem.allegationSource + '</div></div>');
+      printWindow.document.write('<div class="detail-row"><div class="detail-label">Status:</div><div class="detail-value">' + caseItem.status + '</div></div>');
+      printWindow.document.write('<div class="detail-row"><div class="detail-label">Potential O/P:</div><div class="detail-value">$' + parseFloat(caseItem.potentialOP || 0).toFixed(2) + '</div></div>');
+      printWindow.document.write('<div class="detail-row"><div class="detail-label">Connection #:</div><div class="detail-value">' + (caseItem.connectionNum || 'N/A') + '</div></div>');
+      printWindow.document.write('<div class="detail-row"><div class="detail-label">Relationship:</div><div class="detail-value">' + (caseItem.relationship || 'N/A') + '</div></div>');
+      printWindow.document.write('<div class="detail-row"><div class="detail-label">Outcome:</div><div class="detail-value">' + (caseItem.outcome || 'N/A') + '</div></div>');
+      printWindow.document.write('<div class="detail-row"><div class="detail-label">Confidential:</div><div class="detail-value">' + (caseItem.isConfidential === 'true' ? 'Yes' : 'No') + '</div></div>');
+      printWindow.document.write('</div>');
+      
+      if (caseItem.allegation) {
+        printWindow.document.write('<div class="detail-section"><strong>Allegation:</strong><br>' + caseItem.allegation.replace(/\n/g, '<br>') + '</div>');
+      }
+      if (caseItem.connections) {
+        printWindow.document.write('<div class="detail-section"><strong>Connections:</strong><br>' + caseItem.connections.replace(/\n/g, '<br>') + '</div>');
+      }
+      if (caseItem.allegationContact) {
+        printWindow.document.write('<div class="detail-section"><strong>Allegation Contact:</strong><br>' + caseItem.allegationContact.replace(/\n/g, '<br>') + '</div>');
+      }
+      if (caseItem.notes) {
+        printWindow.document.write('<div class="detail-section"><strong>Notes:</strong><br>' + caseItem.notes.replace(/\n/g, '<br>') + '</div>');
+      }
+      if (caseItem.publicNotes) {
+        printWindow.document.write('<div class="detail-section"><strong>Public Notes:</strong><br>' + caseItem.publicNotes.replace(/\n/g, '<br>') + '</div>');
+      }
+      if (caseItem.bpaiRequest) {
+        printWindow.document.write('<div class="detail-section"><strong>BPAI Request:</strong><br>' + caseItem.bpaiRequest.replace(/\n/g, '<br>') + '</div>');
+      }
+      if (caseItem.bpaiContact) {
+        printWindow.document.write('<div class="detail-section"><strong>BPAI Contact:</strong><br>' + caseItem.bpaiContact.replace(/\n/g, '<br>') + '</div>');
+      }
+
+      // Add attached documents section
+      if (caseItem.documents && JSON.parse(caseItem.documents).length > 0) {
+        printWindow.document.write('<h2>Attached Documents</h2>');
+        printWindow.document.write('<div class="document-list">');
+        JSON.parse(caseItem.documents).forEach(doc => {
+          printWindow.document.write('<div class="document-item">');
+          printWindow.document.write('<div class="document-name">' + doc.name + '</div>');
+          printWindow.document.write('<div class="document-size">' + doc.size + '</div>');
+          printWindow.document.write('</div>');
+        });
+        printWindow.document.write('</div>');
+      }
+      
+      printWindow.document.write('<div class="print-date">Printed on: ' + new Date().toLocaleString() + '</div>');
+      printWindow.document.write('</body></html>');
+      printWindow.document.close();
+      printWindow.print();
+    }
+
+    function printCCLRecordPDF(record) {
+      let printWindow = window.open('', '', 'height=800,width=1000');
+      printWindow.document.write('<html><head><title>CCL Record - ' + record.providerName + '</title>');
+      printWindow.document.write('<style>');
+      printWindow.document.write('body { font-family: Arial, sans-serif; margin: 20px; color: #333; }');
+      printWindow.document.write('h1 { color: #001f3f; border-bottom: 2px solid #0066cc; padding-bottom: 10px; }');
+      printWindow.document.write('.detail-section { margin-bottom: 20px; }');
+      printWindow.document.write('.detail-row { display: grid; grid-template-columns: 200px 1fr; margin-bottom: 10px; }');
+      printWindow.document.write('.detail-label { font-weight: bold; color: #001f3f; }');
+      printWindow.document.write('.detail-value { padding-left: 20px; }');
+      printWindow.document.write('.page-break { page-break-after: always; }');
+      printWindow.document.write('.print-date { color: #666; font-size: 12px; margin-top: 30px; }');
+      printWindow.document.write('</style>');
+      printWindow.document.write('</head><body>');
+      
+      printWindow.document.write('<h1>CCL Record Details</h1>');
+      printWindow.document.write('<div class="detail-section">');
+      printWindow.document.write('<div class="detail-row"><div class="detail-label">Provider ID:</div><div class="detail-value">' + record.providerID + '</div></div>');
+      printWindow.document.write('<div class="detail-row"><div class="detail-label">Provider Name:</div><div class="detail-value">' + record.providerName + '</div></div>');
+      printWindow.document.write('<div class="detail-row"><div class="detail-label">Provider License #:</div><div class="detail-value">' + (record.providerLic || 'N/A') + '</div></div>');
+      printWindow.document.write('<div class="detail-row"><div class="detail-label">Date:</div><div class="detail-value">' + record.date + '</div></div>');
+      printWindow.document.write('<div class="detail-row"><div class="detail-label">LPA:</div><div class="detail-value">' + record.lpa + '</div></div>');
+      printWindow.document.write('<div class="detail-row"><div class="detail-label">Provider Status:</div><div class="detail-value">' + record.providerStatus + '</div></div>');
+      printWindow.document.write('<div class="detail-row"><div class="detail-label">Visit Date:</div><div class="detail-value">' + (record.visitDate || 'N/A') + '</div></div>');
+      printWindow.document.write('<div class="detail-row"><div class="detail-label">Visit Time:</div><div class="detail-value">' + (record.visitTime || 'N/A') + '</div></div>');
+      printWindow.document.write('<div class="detail-row"><div class="detail-label">Sent:</div><div class="detail-value">' + (record.sent || 'N/A') + '</div></div>');
+      printWindow.document.write('<div class="detail-row"><div class="detail-label">Requested Docs/Info:</div><div class="detail-value">' + (record.requestedDocs || 'N/A') + '</div></div>');
+      printWindow.document.write('</div>');
+      
+      if (record.familyOfConcern) {
+        printWindow.document.write('<div class="detail-section"><strong>Family of Concern:</strong><br>' + record.familyOfConcern.replace(/\n/g, '<br>') + '</div>');
+      }
+      if (record.census) {
+        printWindow.document.write('<div class="detail-section"><strong>Census:</strong><br>' + record.census.replace(/\n/g, '<br>') + '</div>');
+      }
+      if (record.notes) {
+        printWindow.document.write('<div class="detail-section"><strong>Notes:</strong><br>' + record.notes.replace(/\n/g, '<br>') + '</div>');
+      }
+      if (record.publicNotes) {
+        printWindow.document.write('<div class="detail-section"><strong>Public Notes:</strong><br>' + record.publicNotes.replace(/\n/g, '<br>') + '</div>');
+      }
+      
+      printWindow.document.write('<div class="print-date">Printed on: ' + new Date().toLocaleString() + '</div>');
+      printWindow.document.write('</body></html>');
+      printWindow.document.close();
+      printWindow.print();
+    }
+
+    function showCCLRecordDetail(id) {
+      const record = cclRecords.find(r => r.__backendId === id);
+      if (!record) {
+        showNotification('Could not load record details', 'error');
+        return;
+      }
+
+      currentDetailRecord = record;
+      const modal = document.getElementById('cclDetailModal');
+      const content = document.getElementById('cclDetailContent');
+
+      content.innerHTML = `
+        <div class="detail-grid">
+          <div class="detail-row">
+            <label>Provider ID</label>
+            <value>${record.providerID}</value>
+          </div>
+          <div class="detail-row">
+            <label>Provider Name</label>
+            <value>${record.providerName}</value>
+          </div>
+        </div>
+        <div class="detail-grid">
+          <div class="detail-row">
+            <label>Provider License #</label>
+            <value>${record.providerLic || 'N/A'}</value>
+          </div>
+          <div class="detail-row">
+            <label>Date</label>
+            <value>${record.date}</value>
+          </div>
+        </div>
+        <div class="detail-grid">
+          <div class="detail-row">
+            <label>LPA</label>
+            <value>${record.lpa}</value>
+          </div>
+          <div class="detail-row">
+            <label>Provider Status</label>
+            <value>${record.providerStatus}</value>
+          </div>
+        </div>
+        <div class="detail-grid">
+          <div class="detail-row">
+            <label>Visit Date</label>
+            <value>${record.visitDate || 'N/A'}</value>
+          </div>
+          <div class="detail-row">
+            <label>Visit Time</label>
+            <value>${record.visitTime || 'N/A'}</value>
+          </div>
+        </div>
+        <div class="detail-grid">
+          <div class="detail-row">
+            <label>Sent</label>
+            <value>${record.sent || 'N/A'}</value>
+          </div>
+          <div class="detail-row">
+            <label>Requested Docs/Info</label>
+            <value>${record.requestedDocs || 'N/A'}</value>
+          </div>
+        </div>
+        <div class="detail-grid full">
+          <div class="detail-row">
+            <label>Family of Concern</label>
+            <value>${record.familyOfConcern || 'N/A'}</value>
+          </div>
+        </div>
+        <div class="detail-grid full">
+          <div class="detail-row">
+            <label>Census</label>
+            <value>${record.census || 'N/A'}</value>
+          </div>
+        </div>
+        <div class="detail-grid full">
+          <div class="detail-row">
+            <label>Notes</label>
+            <value>${record.notes || 'N/A'}</value>
+          </div>
+        </div>
+        <div class="detail-grid full">
+          <div class="detail-row">
+            <label>Public Notes</label>
+            <value>${record.publicNotes || 'N/A'}</value>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('editRecordFromDetailBtn').onclick = function() {
+        closeDetailModal();
+        editCCLRecord(id);
+      };
+
+      document.getElementById('deleteRecordFromDetailBtn').onclick = function() {
+        closeDetailModal();
+        deleteCCLRecord(id);
+      };
+
+      document.getElementById('printRecordFromDetailBtn').onclick = function() {
+        printCCLRecordPDF(record);
+      };
+
+      modal.classList.add('active');
+      lucide.createIcons();
+    }
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9f0de2e8c6762adb',t:'MTc3Njk1Nzk4NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
+</body>
+</html>
