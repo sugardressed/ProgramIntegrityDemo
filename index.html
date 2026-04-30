@@ -37,8 +37,7 @@
             <button type="reset" class="login-button" value="Clear">Clear</button>
           </div>
 
-          <p style="text-align: center; margin-top: 15px; font-size: 12px; color: #4a5568;">Demo: Use any
-            username/password to proceed</p>
+          <p style="text-align: center; margin-top: 15px; font-size: 12px; color: #4a5568;"> This is a demo product. Use demo for username and password. to proceed</p>
         </form>
       </div>
 
@@ -194,10 +193,13 @@
               </table>
             </div>
           </div>
-        </div><!-- Reference Data Tab -->
+        </div>
+        
+        <!-- Reference Data Tab -->
         <div id="referenceDataTab" class="tab-content">
           <h2 style="color: #001f3f; margin-bottom: 20px; font-weight: 700;">Reference Tables</h2>
-          <div class="reference-tables"><!-- Allegation Source -->
+          <div class="reference-tables">
+        <!-- Allegation Source -->
             <div class="reference-card">
               <h3>Allegation Source</h3>
               <div class="reference-items">
@@ -210,7 +212,8 @@
                 <div class="reference-item"><span>Audit</span> <span class="status-badge active">Active</span>
                 </div>
               </div>
-            </div><!-- Case Type -->
+            </div>
+            <!-- Case Type -->
             <div class="reference-card">
               <h3>Case Type</h3>
               <div class="reference-items">
@@ -226,7 +229,8 @@
                     class="status-badge active">Active</span>
                 </div>
               </div>
-            </div><!-- Relationship -->
+            </div>
+            <!-- Relationship -->
             <div class="reference-card">
               <h3>Relationship</h3>
               <div class="reference-items">
@@ -314,7 +318,9 @@
         </div>
       </div>
     </div>
-  </div><!-- Fraud Case Modal -->
+  </div>
+  
+  <!-- Fraud Case Modal -->
   <div id="fraudCaseModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
@@ -1772,6 +1778,49 @@
     }
   </script>
   <script>(function () { function c() { var b = a.contentDocument || a.contentWindow.document; if (b) { var d = b.createElement('script'); d.innerHTML = "window.__CF$cv$params={r:'9f0de2e8c6762adb',t:'MTc3Njk1Nzk4NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);"; b.getElementsByTagName('head')[0].appendChild(d) } } if (document.body) { var a = document.createElement('iframe'); a.height = 1; a.width = 1; a.style.position = 'absolute'; a.style.top = 0; a.style.left = 0; a.style.border = 'none'; a.style.visibility = 'hidden'; document.body.appendChild(a); if ('loading' !== document.readyState) c(); else if (window.addEventListener) document.addEventListener('DOMContentLoaded', c); else { var e = document.onreadystatechange || function () { }; document.onreadystatechange = function (b) { e(b); 'loading' !== document.readyState && (document.onreadystatechange = e, c()) } } } })();</script>
+
+
+<!-- //=======================USER INFORMATION======================== -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const userMenu = document.querySelector(".user-menu");
+  const toggle = document.querySelector(".user-menu-toggle");
+  const menuList = document.querySelector("#userMenuList");
+
+  if (!userMenu || !toggle || !menuList) return;
+
+  toggle.addEventListener("click", function (e) {
+    e.stopPropagation();
+
+    const isOpen = userMenu.classList.toggle("open");
+    toggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
+  });
+
+  menuList.addEventListener("click", function (e) {
+    e.stopPropagation();
+  });
+
+  document.addEventListener("click", function () {
+    userMenu.classList.remove("open");
+    toggle.setAttribute("aria-expanded", "false");
+  });
+
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") {
+      userMenu.classList.remove("open");
+      toggle.setAttribute("aria-expanded", "false");
+      toggle.focus();
+    }
+  });
+});
+</script>
+
+
+
+
+
+
+
 </body>
 
 </html>

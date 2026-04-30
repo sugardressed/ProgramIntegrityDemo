@@ -114,7 +114,7 @@ function triggerExplosion() {
 
   // Show home page after explosion
   setTimeout(() => {
-    window.location.href = "http://localhost/FraudTrackDemo/";
+    window.location.href = "https://elizabeth.xugarsoft.com/PI_Demo/";
   }, 200);
 }
 
