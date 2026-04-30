@@ -32,6 +32,12 @@
       background: linear-gradient(135deg, #001f3f 0%, #0d47a1 100%);
     }
 
+    .login-buttons{
+      display: flex;
+      gap: 0 15px;
+      justify-content: center;
+    }
+
     .login-card {
       background: white;
       border-radius: 12px;
